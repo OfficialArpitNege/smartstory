@@ -1,6 +1,7 @@
 package com.smartstory.controller;
 
 import com.smartstory.dto.StoryCreateRequest;
+import com.smartstory.dto.StoryResponseDto;
 import com.smartstory.dto.StoryVisibilityResponse;
 import com.smartstory.entity.Story;
 import com.smartstory.service.StoryCreationRequest;
@@ -19,7 +20,7 @@ public class StoryController {
     }
 
     @PostMapping
-    public ResponseEntity<Story> createStory(@RequestBody StoryCreateRequest request) {
+    public ResponseEntity<StoryResponseDto> createStory(@RequestBody StoryCreateRequest request) {
         StoryCreationRequest creationRequest = new StoryCreationRequest();
         creationRequest.setUserId(request.getUserId());
         creationRequest.setContent(request.getContent());
@@ -28,7 +29,14 @@ public class StoryController {
         creationRequest.setExceptionUserIds(request.getExceptionUserIds());
 
         Story story = storyService.createStoryWithRules(creationRequest);
-        return ResponseEntity.ok(story);
+        StoryResponseDto response = storyService.mapToStoryResponseDto(story);
+        return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/{storyId}")
+    public ResponseEntity<StoryResponseDto> getStoryById(@PathVariable Long storyId) {
+        StoryResponseDto response = storyService.getStoryResponseById(storyId);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{storyId}/visibility")

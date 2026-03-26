@@ -1,10 +1,13 @@
 package com.smartstory.service;
 
+import com.smartstory.dto.GroupDto;
+import com.smartstory.dto.StoryResponseDto;
 import com.smartstory.entity.*;
 import com.smartstory.repository.*;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -67,6 +70,33 @@ public class StoryService {
         return story;
     }
 
+    @Transactional(readOnly = true)
+    public StoryResponseDto getStoryResponseById(Long storyId) {
+        Story story = storyRepository.findById(storyId)
+                .orElseThrow(() -> new IllegalArgumentException("Story not found: " + storyId));
+        return mapToStoryResponseDto(story);
+    }
+
+    public StoryResponseDto mapToStoryResponseDto(Story story) {
+        List<StoryGroup> storyGroups = storyGroupRepository.findByStory(story);
+
+        List<GroupDto> groupDtos = storyGroups.stream()
+                .map(storyGroup -> new GroupDto(storyGroup.getGroup().getId(), storyGroup.getGroup().getName()))
+                .collect(Collectors.toList());
+
+        Mode mode = null;
+        if (story.getStoryRule() != null) {
+            mode = story.getStoryRule().getMode();
+        }
+
+        return new StoryResponseDto(
+                story.getId(),
+                story.getContent(),
+                mode,
+                groupDtos == null ? Collections.emptyList() : groupDtos
+        );
+    }
+
 private void storeStoryGroups(StoryCreationRequest request, Story story) {
 
     if (request.getGroupIds() == null || request.getGroupIds().isEmpty()) {
@@ -120,9 +150,13 @@ private void storeStoryGroups(StoryCreationRequest request, Story story) {
         User viewer = userRepository.findById(viewerId)
                 .orElseThrow(() -> new IllegalArgumentException("User not found: " + viewerId));
 
+        if (story.getUser() != null && story.getUser().getId().equals(viewerId)) {
+            return true;
+        }
+
         List<StoryException> exceptions = storyExceptionRepository.findByStory(story);
         if (exceptions.stream().anyMatch(it -> it.getUser().getId().equals(viewerId))) {
-            return true;
+            return false;
         }
 
         StoryRule storyRule = story.getStoryRule();
@@ -146,8 +180,10 @@ private void storeStoryGroups(StoryCreationRequest request, Story story) {
         intersect.retainAll(viewerGroupIds);
 
         if (mode == Mode.SHOW) {
-            // if no groups selected, no one can view
-            return !groupIds.isEmpty() && !intersect.isEmpty();
+            if (groupIds.isEmpty()) {
+                return true;
+            }
+            return !intersect.isEmpty();
         }
 
         if (mode == Mode.HIDE) {

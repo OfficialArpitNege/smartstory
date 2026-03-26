@@ -1,0 +1,90 @@
+[
+    {
+        "Case":  1,
+        "StoryId":  42,
+        "Expected":  true,
+        "Actual":  true,
+        "Pass":  true,
+        "Notes":  "Creator always sees"
+    },
+    {
+        "Case":  2,
+        "StoryId":  43,
+        "Expected":  true,
+        "Actual":  true,
+        "Pass":  true,
+        "Notes":  "In group can view"
+    },
+    {
+        "Case":  3,
+        "StoryId":  44,
+        "Expected":  false,
+        "Actual":  false,
+        "Pass":  true,
+        "Notes":  "Not in group cannot view"
+    },
+    {
+        "Case":  4,
+        "StoryId":  45,
+        "Expected":  true,
+        "Actual":  true,
+        "Pass":  true,
+        "Notes":  "Creator always sees"
+    },
+    {
+        "Case":  5,
+        "StoryId":  46,
+        "Expected":  false,
+        "Actual":  false,
+        "Pass":  true,
+        "Notes":  "In hidden group cannot view"
+    },
+    {
+        "Case":  6,
+        "StoryId":  47,
+        "Expected":  true,
+        "Actual":  true,
+        "Pass":  true,
+        "Notes":  "Not in hidden group can view"
+    },
+    {
+        "Case":  7,
+        "StoryId":  48,
+        "Expected":  false,
+        "Actual":  false,
+        "Pass":  true,
+        "Notes":  "SHOW + exception expected block"
+    },
+    {
+        "Case":  8,
+        "StoryId":  49,
+        "Expected":  true,
+        "Actual":  true,
+        "Pass":  true,
+        "Notes":  "In group not excepted"
+    },
+    {
+        "Case":  9,
+        "StoryId":  50,
+        "Expected":  false,
+        "Actual":  false,
+        "Pass":  true,
+        "Notes":  "HIDE + exception expected block"
+    },
+    {
+        "Case":  10,
+        "StoryId":  51,
+        "Expected":  true,
+        "Actual":  true,
+        "Pass":  true,
+        "Notes":  "Not in group can view"
+    },
+    {
+        "Case":  11,
+        "StoryId":  52,
+        "Expected":  true,
+        "Actual":  true,
+        "Pass":  true,
+        "Notes":  "No groups should be public"
+    }
+]

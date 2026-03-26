@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Story API Tester</title>
+</head>
+<body>
+    <h1>Smart Story Backend API Tester</h1>
+
+    <!-- Story Creation Form -->
+    <h2>1. Create Story</h2>
+    <form id="storyForm">
+        <div>
+            <label>User ID:</label>
+            <input type="number" id="userId" required placeholder="e.g., 1">
+        </div>
+        <div>
+            <label>Content:</label>
+            <textarea id="content" required placeholder="Your story content..."></textarea>
+        </div>
+        <div>
+            <label>Mode:</label>
+            <select id="mode" required>
+                <option value="SHOW">SHOW</option>
+                <option value="HIDE">HIDE</option>
+            </select>
+        </div>
+        <div>
+            <label>Group IDs (comma-separated):</label>
+            <input type="text" id="groupIds" placeholder="e.g., 1,2,3">
+        </div>
+        <button type="submit">Create Story</button>
+    </form>
+
+    <!-- Story Creation Response -->
+    <div id="storyResponse" style="margin-top: 20px; padding: 10px; background-color: #f0f0f0; display: none;">
+        <h3>Response:</h3>
+        <pre id="storyResponseText"></pre>
+    </div>
+
+    <!-- Story Visibility Check Form -->
+    <h2 style="margin-top: 40px;">2. Check Story Visibility</h2>
+    <form id="visibilityForm">
+        <div>
+            <label>Story ID:</label>
+            <input type="number" id="storyId" required placeholder="e.g., 1">
+        </div>
+        <div>
+            <label>Viewer User ID:</label>
+            <input type="number" id="viewerId" required placeholder="e.g., 2">
+        </div>
+        <button type="submit">Check Visibility</button>
+    </form>
+
+    <!-- Visibility Response -->
+    <div id="visibilityResponse" style="margin-top: 20px; padding: 10px; background-color: #f0f0f0; display: none;">
+        <h3>Visibility Result:</h3>
+        <pre id="visibilityResponseText"></pre>
+    </div>
+
+    <script>
+        // Story Creation Handler
+        document.getElementById('storyForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const userId = document.getElementById('userId').value;
+            const content = document.getElementById('content').value;
+            const mode = document.getElementById('mode').value;
+            const groupIdsStr = document.getElementById('groupIds').value;
+            
+            const groupIds = groupIdsStr
+                ? groupIdsStr.split(',').map(id => parseInt(id.trim()))
+                : [];
+
+            const payload = {
+                userId: parseInt(userId),
+                content: content,
+                mode: mode,
+                groupIds: groupIds,
+                exceptionUserIds: []
+            };
+
+            try {
+                const response = await fetch('http://localhost:8080/api/stories', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+                document.getElementById('storyResponseText').textContent = JSON.stringify(data, null, 2);
+                document.getElementById('storyResponse').style.display = 'block';
+
+                // Auto-fill story ID if creation was successful
+                if (data.id) {
+                    document.getElementById('storyId').value = data.id;
+                    alert('Story created! Story ID: ' + data.id);
+                }
+            } catch (error) {
+                document.getElementById('storyResponseText').textContent = 'Error: ' + error.message;
+                document.getElementById('storyResponse').style.display = 'block';
+            }
+        });
+
+        // Visibility Check Handler
+        document.getElementById('visibilityForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const storyId = document.getElementById('storyId').value;
+            const viewerId = document.getElementById('viewerId').value;
+
+            try {
+                const response = await fetch(
+                    `http://localhost:8080/api/stories/${storyId}/visibility?userId=${viewerId}`,
+                    {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        }
+                    }
+                );
+
+                const data = await response.json();
+                const result = `Story ID: ${data.storyId}\nViewer ID: ${data.userId}\nCan View: ${data.canView}`;
+                document.getElementById('visibilityResponseText').textContent = result;
+                document.getElementById('visibilityResponse').style.display = 'block';
+            } catch (error) {
+                document.getElementById('visibilityResponseText').textContent = 'Error: ' + error.message;
+                document.getElementById('visibilityResponse').style.display = 'block';
+            }
+        });
+    </script>
+</body>
+</html>
